@@ -83,8 +83,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         if (mAzimuth >= 350 || mAzimuth <= 10) {
             where = "N";
-            long[] pattern = {0, 100, 1000};
-            //v.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+            v.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
             layout.setBackgroundColor(Color.BLACK);
             tv.setTextColor(Color.WHITE);
             if(!mp.isPlaying()){
