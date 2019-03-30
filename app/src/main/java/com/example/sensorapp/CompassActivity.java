@@ -1,20 +1,29 @@
 package com.example.sensorapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.util.Random;
 
 public class CompassActivity extends AppCompatActivity implements SensorEventListener {
 
+    private static final float ALPHA = 0.20f;
     ImageView compass_img;
     TextView txt_compass;
     int mAzimuth;
@@ -27,6 +36,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     private float[] mLastMagnetometer = new float[3];
     private boolean mLastAccelerometerSet = false;
     private boolean mLastMagnetometerSet = false;
+    Vibrator v;
+    RelativeLayout layout;
+    TextView tv;
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +49,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         compass_img = (ImageView) findViewById(R.id.imageViewCompass);
         txt_compass = (TextView) findViewById(R.id.tvHeading);
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        layout = findViewById(R.id.compasslayout);
+        tv = findViewById(R.id.tvHeading);
+        mp = MediaPlayer.create(this, R.raw.angel_share);
 
         start();
     }
@@ -48,7 +65,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         }
 
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            System.arraycopy(event.values, 0, mLastAccelerometer, 0, event.values.length);
+            mLastAccelerometer = lowPass(event.values.clone(),mLastAccelerometer);
             mLastAccelerometerSet = true;
         } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             System.arraycopy(event.values, 0, mLastMagnetometer, 0, event.values.length);
@@ -62,13 +79,26 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
         mAzimuth = Math.round(mAzimuth);
         compass_img.setRotation(-mAzimuth);
-
         String where = "NW";
 
-        if (mAzimuth >= 350 || mAzimuth <= 10)
+        if (mAzimuth >= 350 || mAzimuth <= 10) {
             where = "N";
-        if (mAzimuth < 350 && mAzimuth > 280)
+            long[] pattern = {0, 100, 1000};
+            //v.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+            layout.setBackgroundColor(Color.BLACK);
+            tv.setTextColor(Color.WHITE);
+            if(!mp.isPlaying()){
+                mp.start();
+            }
+        }
+        if (mAzimuth < 350 && mAzimuth > 280) {
             where = "NW";
+            layout.setBackgroundColor(Color.WHITE);
+            tv.setTextColor(Color.BLACK);
+            if(mp.isPlaying()){
+                mp.pause();
+            }
+        }
         if (mAzimuth <= 280 && mAzimuth > 260)
             where = "W";
         if (mAzimuth <= 260 && mAzimuth > 190)
@@ -79,8 +109,14 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             where = "SE";
         if (mAzimuth <= 100 && mAzimuth > 80)
             where = "E";
-        if (mAzimuth <= 80 && mAzimuth > 10)
+        if (mAzimuth <= 80 && mAzimuth > 10) {
             where = "NE";
+            layout.setBackgroundColor(Color.WHITE);
+            tv.setTextColor(Color.BLACK);
+            if(mp.isPlaying()){
+                mp.pause();
+            }
+        }
 
 
         txt_compass.setText(mAzimuth + "° " + where);
@@ -141,6 +177,15 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     protected void onResume() {
         super.onResume();
         start();
+    }
+
+    protected float[] lowPass( float[] input, float[] output ) {
+        if ( output == null ) return input;
+
+        for ( int i=0; i<input.length; i++ ) {
+            output[i] = output[i] + ALPHA * (input[i] - output[i]);
+        }
+        return output;
     }
 
 }
