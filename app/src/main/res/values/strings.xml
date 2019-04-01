@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SensorApp</string>
-    <string name="edit_message">Enter a message</string>
-    <string name="button_send">Send</string>
+    <string name="edit_message">Pick a color</string>
+    <string name="button_send">Change</string>
     <string name="acc_button">Accelerometer</string>
     <string name="acc_descr">Accelerometer values:</string>
     <string name="compass_button">Compass</string>

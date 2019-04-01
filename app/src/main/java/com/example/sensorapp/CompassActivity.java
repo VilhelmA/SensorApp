@@ -53,7 +53,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         layout = findViewById(R.id.compasslayout);
         tv = findViewById(R.id.tvHeading);
         mp = MediaPlayer.create(this, R.raw.angel_share);
-
+        mp.setLooping(true);
         start();
     }
 
